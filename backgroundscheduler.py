@@ -36,7 +36,8 @@ class BackgroundSchedulerConfigure:
             new_job = BackgroundSchedulerConfigure.scheduler.add_job(func,
                                                                      'interval',
                                                                      seconds=interval_secs,
-                                                                     id=id_job)
+                                                                     id=id_job,
+                                                                     replace_existing=True)
             BackgroundSchedulerConfigure.list_jobs.append(new_job)
             print('Background Launched Interval: {}'.format(interval_secs))
             return True
