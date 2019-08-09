@@ -16,6 +16,7 @@ class DateTimeEncoder(json.JSONEncoder):
 class ServerMQTT(object):
     client_mqtt = None
     flag_connected = 0
+    counter_message_published = 0
     hostname = str('')
     port = 0
 
@@ -43,11 +44,14 @@ class ServerMQTT(object):
             print('ServerMQTT Disconnected')
             client.reconnect()
         except Exception as ex:
-            print('Exception: {}'.format(ex))
+            print('ServerMQTT on_disconnect Exception: {}'.format(ex))
 
     @staticmethod
     def on_publish(client, userdata, result):
-        print('OnPublish Method raised')
+        ServerMQTT.counter_message_published += 1
+
+        if (ServerMQTT.counter_message_published % 500) == 0:
+            print('OnPublish Method raised: {}'.format(ServerMQTT.counter_message_published))
 
     @staticmethod
     def configure_client(client_id: str, hostname: str, port: int):
@@ -86,7 +90,7 @@ class ServerMQTT(object):
             print('ServerMQTT Loop Forever Exception: {}'.format(ex))
 
     @staticmethod
-    def publish_bis(topic: str, dictionary: Dict[str, Any]):
+    def publish(topic: str, dictionary: Dict[str, Any]) -> bool:
         try:
             if ServerMQTT.flag_connected == 0 or not ServerMQTT.client_mqtt:
                 return False
@@ -95,36 +99,22 @@ class ServerMQTT(object):
                 print('No Datat To Transfer')
                 return False
 
-            print('Try Sending MQTT Message publish_bis....')
+            # print('Try Sending MQTT Message publish_bis....')
 
             string_json = json.dumps(obj=dictionary,
                                      cls=DateTimeEncoder)
 
-            ServerMQTT.get_client_mqtt().publish(topic=topic, payload=string_json, qos=0, retain=False)
+            return_info = ServerMQTT.get_client_mqtt().publish(topic=topic, payload=string_json, qos=0, retain=False)
 
-            print('Success Sending publish_bis: {}'.format(string_json))
-        except Exception as ex:
-            print('Exception ServerMQTT PublishBis: {}'.format(ex))
-
-    @staticmethod
-    def publish(hostname: str, port: int, topic: str, client_id: str,  dictionary: Dict[str, Any]):
-        try:
-            if not dictionary:
-                print('No Datat To Transfer')
+            if not return_info:
                 return False
 
-            print('Try Sending MQTT Message....')
+            if return_info.rc != mqtt.MQTT_ERR_SUCCESS:
+                print('ServerMQTT Publish Error: {}'.format(str(return_info.rc)))
+                return False
 
-            string_json = json.dumps(obj=dictionary,
-                                     cls=DateTimeEncoder)
-            publish.single(topic=topic,
-                           payload=string_json,
-                           hostname=hostname,
-                           port=port,
-                           client_id=client_id,
-                           retain=False,
-                           qos=0
-                           )
-            print('Success Sending: {}'.format(string_json))
+            # print('Success Sending publish_bis: {}'.format(string_json))
+            return True
         except Exception as ex:
-            print('Exception ServerMQTT Publish: {}'.format(ex))
+            print('Exception ServerMQTT PublishBis: {}'.format(ex))
+            return False

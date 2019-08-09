@@ -40,14 +40,9 @@ class Publisher(object):
                                             iot_id=iot_id,
                                             lat=55.67298336627162,
                                             lon=12.56703788516)
-                ServerMQTT.publish_bis(topic=topic,
-                                       dictionary=localization.to_dictionary())
+                ServerMQTT.publish(topic=topic,
+                                   dictionary=localization.to_dictionary())
 
-                # ServerMQTT.publish(hostname=hostname,
-                #                    client_id=client_id,
-                #                    port=port,
-                #                    topic=topic,
-                #                    dictionary=localization.to_dictionary())
                 counter_message_sent += 1
 
                 if (counter_message_sent % 125) == 0:

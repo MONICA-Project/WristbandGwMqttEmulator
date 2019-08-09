@@ -9,6 +9,24 @@ from settings import Settings
 from typing import List, Dict
 
 
+def main():
+    try:
+        print('Started Application MQTT. Number Wristband Emulated: {}'.format(len(DICTIONARY_OBSERVABLE_TOPICS)))
+        signal.signal(signal.SIGINT, signal_handler)
+
+        BackgroundSchedulerConfigure.configure()
+        BackgroundSchedulerConfigure.add_job(func=periodic_publish,
+                                             interval_secs=Settings.interval_sending_secs,
+                                             id_job=Settings.job_id)
+        BackgroundSchedulerConfigure.start()
+
+        Publisher.configure(client_id=Settings.client_id, hostname=Settings.hostname, port=Settings.port)
+        Publisher.connect()
+        Publisher.loop_wait()
+    except Exception as ex:
+        print('Exception Main: {}'.format(ex))
+
+
 def extract_list_topics(dictionary_obs: Dict[int, List[str]]) -> list:
     if not dictionary_obs:
         return None
@@ -52,25 +70,4 @@ def signal_handler(signal, frame):
 
 
 if __name__ == '__main__':
-    try:
-        print('Started Application MQTT. Number Wristband Emulated: {}'.format(len(DICTIONARY_OBSERVABLE_TOPICS)))
-        signal.signal(signal.SIGINT, signal_handler)
-
-        BackgroundSchedulerConfigure.configure()
-        BackgroundSchedulerConfigure.add_job(func=periodic_publish,
-                                             interval_secs=Settings.interval_sending_secs,
-                                             id_job=Settings.job_id)
-        BackgroundSchedulerConfigure.start()
-
-        Publisher.configure(client_id=Settings.client_id, hostname=Settings.hostname, port=Settings.port)
-        Publisher.connect()
-        Publisher.loop_wait()
-
-        # list_topics = extract_list_topics(dictionary_obs=DICTIONARY_OBSERVABLE_TOPICS)
-
-        # MQTTClient.initialize(client_id=Settings.client_id)
-        # MQTTClient.set_list_topics(list_topics=list_topics)
-        # MQTTClient.connect(hostname=Settings.hostname,
-        #                    port=Settings.port)
-    except Exception as ex:
-        print('Exception Main: {}'.format(ex))
+    main()
