@@ -3,6 +3,7 @@ from mqtt_publisher import ServerMQTT
 
 
 class Publisher(object):
+
     @staticmethod
     def configure(client_id: str, hostname: str, port: int):
         ServerMQTT.configure_client(client_id=client_id, hostname=hostname, port=port)
@@ -20,7 +21,7 @@ class Publisher(object):
         ServerMQTT.stop_client()
 
     @staticmethod
-    def publish_topics(dictionary_observables: dict):
+    def publish_topics(dictionary_observables: object) -> object:
         try:
             if not dictionary_observables:
                 return
@@ -28,15 +29,16 @@ class Publisher(object):
             counter_message_sent = 0
 
             for iot_id in dictionary_observables:
-                list_topic_tagid = dictionary_observables[iot_id]
+                list_topic_tag_id = dictionary_observables[iot_id]
 
-                if len(list_topic_tagid) < 2:
+                if len(list_topic_tag_id) < 2:
+                    print("Element ignored: " + str(list_topic_tag_id))
                     continue
 
-                topic = list_topic_tagid[0]
-                tagId = list_topic_tagid[1]
+                topic = list_topic_tag_id[0]
+                tag_id = list_topic_tag_id[1]
 
-                localization = Localization(tag_id=tagId,
+                localization = Localization(tag_id=tag_id,
                                             iot_id=iot_id,
                                             lat=55.67298336627162,
                                             lon=12.56703788516)
@@ -45,7 +47,7 @@ class Publisher(object):
 
                 counter_message_sent += 1
 
-                if (counter_message_sent % 125) == 0:
+                if (counter_message_sent % 100) == 0:
                     print('MQTT Publish Messages: {}'.format(counter_message_sent))
 
             print('MQTT Publish Messages Completed: {}'.format(counter_message_sent))

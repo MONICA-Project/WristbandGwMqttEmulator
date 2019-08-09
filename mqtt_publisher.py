@@ -53,8 +53,8 @@ class ServerMQTT(object):
 
         if (ServerMQTT.counter_message_published % ServerMQTT.debug_numbernotification) == 0:
             interval_secs = (datetime.datetime.utcnow()-ServerMQTT.reference_datetime).total_seconds()
-            print('ServerMQTT OnPublish Method raised: {0} RelativeTime: {1}'.format(ServerMQTT.counter_message_published,
-                                                                                     interval_secs))
+            print('ServerMQTT OnPublish Method raised: {0} RelativeTime: {1}'.format(
+                ServerMQTT.counter_message_published, interval_secs))
 
     @staticmethod
     def configure_client(client_id: str, hostname: str, port: int):
@@ -100,10 +100,8 @@ class ServerMQTT(object):
                 return False
 
             if not dictionary:
-                print('No Datat To Transfer')
+                print('No Data To Transfer')
                 return False
-
-            # print('Try Sending MQTT Message publish_bis....')
 
             string_json = json.dumps(obj=dictionary,
                                      cls=DateTimeEncoder)
@@ -117,8 +115,8 @@ class ServerMQTT(object):
                 print('ServerMQTT Publish Error: {}'.format(str(return_info.rc)))
                 return False
 
-            # print('Success Sending publish_bis: {}'.format(string_json))
             return True
+
         except Exception as ex:
             print('Exception ServerMQTT PublishBis: {}'.format(ex))
             return False

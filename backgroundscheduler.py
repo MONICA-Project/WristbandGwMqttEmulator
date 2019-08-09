@@ -1,13 +1,13 @@
 from pytz import utc
 
+# from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.executors.pool import ProcessPoolExecutor
 
-jobstores = {
-    'mongo': {'type': 'mongodb'},
-    'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
-}
+# jobstores = {
+#     'mongo': {'type': 'mongodb'},
+#     'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
+# }
 executors = {
     'default': {'type': 'threadpool', 'max_workers': 20},
     'processpool': ProcessPoolExecutor(max_workers=5)
@@ -21,11 +21,13 @@ job_defaults = {
 class BackgroundSchedulerConfigure:
     scheduler = None
     list_jobs = list()
+
     @staticmethod
     def configure():
         try:
             BackgroundSchedulerConfigure.scheduler = BackgroundScheduler()
-            BackgroundSchedulerConfigure.scheduler.configure(jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=utc)
+            BackgroundSchedulerConfigure.scheduler.configure(
+                executors=executors, job_defaults=job_defaults, timezone=utc)
             BackgroundSchedulerConfigure.scheduler.remove_all_jobs()
         except Exception as ex:
             print('Exception Background: {}'.format(ex))

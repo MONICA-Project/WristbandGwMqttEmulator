@@ -1,7 +1,6 @@
 import datetime
 import signal
 import sys
-from dictionary_topics import DICTIONARY_OBSERVABLE_TOPICS
 from backgroundscheduler import BackgroundSchedulerConfigure
 from mqtt_client import MQTTClient
 from messagesender import Publisher
@@ -9,12 +8,19 @@ from settings import Settings
 from typing import List, Dict
 from utilitytimer import TimerRequest
 
+DEVICES = {}
+
 
 def main():
     try:
-        print('Started Application MQTT. Number Wristband Emulated: {}'.format(len(DICTIONARY_OBSERVABLE_TOPICS)))
+        print('Started Application MQTT')
         signal.signal(signal.SIGINT, signal_handler)
 
+        print('Generating MQTT Devices...')
+        global DEVICES
+        DEVICES = generate_devices_dictionary()
+
+        print('Started Application MQTT. Number Wristband Emulated: {}'.format(len(DEVICES)))
         BackgroundSchedulerConfigure.configure()
         BackgroundSchedulerConfigure.add_job(func=periodic_publish,
                                              interval_secs=Settings.interval_sending_secs,
@@ -28,6 +34,22 @@ def main():
         Publisher.loop_wait()
     except Exception as ex:
         print('Exception Main: {}'.format(ex))
+
+
+def generate_devices_dictionary():
+    topic = Settings.topic_prefix+"SCRAL/"+Settings.device+"/"+Settings.property
+
+    devices = {}
+    for i in range(0, Settings.device_number):
+        if i < 10:
+            str_i = "0"+str(i)
+        else:
+            str_i = str(i)
+
+        devices[i] = [topic, Settings.device_name+str_i]
+        print(str_i+": "+str(devices[i]))
+
+    return devices
 
 
 def extract_list_topics(dictionary_obs: Dict[int, List[str]]) -> list:
@@ -62,11 +84,11 @@ def periodic_publish():
             return
         Settings.list_events_publish.append(1)
         print('Called periodic publish, time: {}'.format(datetime.datetime.utcnow().isoformat()))
-        Publisher.publish_topics(dictionary_observables=DICTIONARY_OBSERVABLE_TOPICS)
+        Publisher.publish_topics(dictionary_observables=DEVICES)
         Settings.list_events_publish.clear()
 
         if Settings.just_one_time_execution == 1:
-            print('Request ONE TIME Execution')
+            print('\nRequest ONE TIME Execution')
             TimerRequest.action_timer()
 
     except Exception as ex:
@@ -76,7 +98,6 @@ def periodic_publish():
 def signal_handler(signal, frame):
     """ This signal handler overwrite the default behaviour of SIGKILL (pressing CTRL+C). """
 
-    print('You pressed Ctrl+C!')
     print("\nThe MQTT listener is turning down now...\n")
     TimerRequest.clear_timer()
     BackgroundSchedulerConfigure.stop()
