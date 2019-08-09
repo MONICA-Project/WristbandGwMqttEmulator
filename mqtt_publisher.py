@@ -1,4 +1,3 @@
-import paho.mqtt.publish as publish
 import paho.mqtt.client as mqtt
 import json
 from typing import Dict, Any
@@ -17,8 +16,10 @@ class ServerMQTT(object):
     client_mqtt = None
     flag_connected = 0
     counter_message_published = 0
+    debug_numbernotification = 1
     hostname = str('')
     port = 0
+    reference_datetime = None
 
     @staticmethod
     def get_client_mqtt() -> mqtt.Client:
@@ -50,8 +51,10 @@ class ServerMQTT(object):
     def on_publish(client, userdata, result):
         ServerMQTT.counter_message_published += 1
 
-        if (ServerMQTT.counter_message_published % 500) == 0:
-            print('OnPublish Method raised: {}'.format(ServerMQTT.counter_message_published))
+        if (ServerMQTT.counter_message_published % ServerMQTT.debug_numbernotification) == 0:
+            interval_secs = (datetime.datetime.utcnow()-ServerMQTT.reference_datetime).total_seconds()
+            print('ServerMQTT OnPublish Method raised: {0} RelativeTime: {1}'.format(ServerMQTT.counter_message_published,
+                                                                                     interval_secs))
 
     @staticmethod
     def configure_client(client_id: str, hostname: str, port: int):
@@ -78,6 +81,7 @@ class ServerMQTT(object):
         try:
             ServerMQTT.client_mqtt.connect(host=ServerMQTT.hostname, port=ServerMQTT.port)
             print('ServerMQTT configure_client hostname: {0}, port: {1}'.format(ServerMQTT.hostname, ServerMQTT.port))
+            ServerMQTT.reference_datetime = datetime.datetime.utcnow()
         except Exception as ex:
             print('ServerMQTT configure_client Exception: {}'.format(ex))
 

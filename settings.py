@@ -6,3 +6,4 @@ class Settings:
     client_id = 'client_id_scral'
     job_id = 'publish_mqtt_scral_observables'
     interval_sending_secs = 20
+    just_one_time_execution = 1
