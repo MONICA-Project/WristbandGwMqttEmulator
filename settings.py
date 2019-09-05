@@ -4,14 +4,17 @@ class Settings:
     job_id = 'publish_mqtt_scral_observables'
     just_one_time_execution = 1
 
-    hostname = 'mpclsifrmq01.monica-cloud.eu'
-    port = 1883
+    # hostname_wp3 = "monappdwp3.monica-cloud.eu"
+    hostname = 'monapp-lst.monica-cloud.eu'
+    # hostname_rab = 'mpclsifrmq01.monica-cloud.eu'
+    port = 1884
     client_id = 'mqtt_wb_simulator'
 
     interval_sending_secs = 5
-    device_number = 10000
+    device_number = 10
     device_name = "GeoTag"
-    topic_prefix = "GOST_LARGE_SCALE_TEST/"
+    # topic_prefix = "GOST_WOODSTOWER/"
+    topic_prefix_lst = "GOST_LARGE_SCALE_TEST/"
     device = "Wristband"
     property = "Localization"
 

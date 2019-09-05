@@ -4,6 +4,14 @@ from mqtt_publisher import ServerMQTT
 
 class Publisher(object):
 
+    class Woodstower(object):
+        lat: float = 45.797549
+        lon: float = 4.952724
+
+    class Tivoli(object):
+        lat: float = 55.67298336627162,
+        lon: float = 12.56703788516
+
     @staticmethod
     def configure(client_id: str, hostname: str, port: int):
         ServerMQTT.configure_client(client_id=client_id, hostname=hostname, port=port)
@@ -40,8 +48,8 @@ class Publisher(object):
 
                 localization = Localization(tag_id=tag_id,
                                             iot_id=iot_id,
-                                            lat=55.67298336627162,
-                                            lon=12.56703788516)
+                                            lat=Publisher.Tivoli.lat,
+                                            lon=Publisher.Tivoli.lon)
                 ServerMQTT.publish(topic=topic,
                                    dictionary=localization.to_dictionary())
 
