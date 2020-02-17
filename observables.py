@@ -2,11 +2,11 @@ import datetime
 
 
 class Localization(object):
-    def __init__(self, tag_id: str, iot_id: int, lat: float, lon: float):
+    def __init__(self, tag_id: str, iot_id: int, area_id: str, lat: float, lon: float):
         self.tagId = tag_id
         self.iot_id = iot_id
         self.type = 868
-        self.areaId = "LST"
+        self.areaId = area_id
         self.motion_state = "unknown"
         self.lat = lat  # 55.67298336627162
         self.lon = lon  # 12.56703788516.0
@@ -23,7 +23,7 @@ class Localization(object):
         return {
             "tagId": self.tagId,
             "type": "868",
-            "areaId": "LST",
+            "areaId": self.areaId,
             "motion_state": "unknown",
             "lat": self.lat,
             "lon": self.lon,

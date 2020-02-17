@@ -15,6 +15,24 @@ class Settings:
     device = "Wristband"
     property = "Localization"
 
+    number_stages = 4
+    name_stages = ['WoodsTower Main', 'WoodsTower Saint Denis', 'WoodsTower Chapiteau', 'WoodsTower Woodsflor']
+    people_distrib_per_stage = [50, 25, 10, 15]
+
+    lat_stages = [45.797197, 45.797434, 45.797425, 45.798159]
+    lon_stages = [4.952072, 4.952652, 4.950973, 4.952864]
+
+    cov_stages = [[[400, 0],
+                   [0, 400]],
+                  [[400, 0],
+                   [0, 400]],
+                  [[400, 0],
+                   [0, 400]],
+                  [[400, 0],
+                   [0, 400]]]
+
+    # cov_stages = [[[1, 0], [0, 1]], [[1, 0], [0, 1]], [[1, 0], [0, 1]], [[1, 0], [0, 1]]]
+
 
 class RemoteSettings:
     list_events_publish = list()

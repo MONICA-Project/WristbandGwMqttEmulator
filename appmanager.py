@@ -1,6 +1,8 @@
 import datetime
 import signal
 import sys
+import numpy as np
+
 from backgroundscheduler import BackgroundSchedulerConfigure
 from mqtt_client import MQTTClient
 from messagesender import Publisher
@@ -13,6 +15,8 @@ DEVICES = {}
 
 def main():
     try:
+        np.random.seed(0)
+
         print('Started Application MQTT')
         signal.signal(signal.SIGINT, signal_handler)
 
