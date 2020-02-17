@@ -9,7 +9,7 @@ class Publisher(object):
         lon: float = 4.952724
 
     class Tivoli(object):
-        lat: float = 55.67298336627162,
+        lat: float = 55.67298336627162
         lon: float = 12.56703788516
 
     @staticmethod
