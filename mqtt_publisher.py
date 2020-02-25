@@ -2,6 +2,7 @@ import paho.mqtt.client as mqtt
 import json
 from typing import Dict, Any
 import datetime
+import logging
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -33,19 +34,19 @@ class ServerMQTT(object):
 
             ServerMQTT.flag_connected = 1
 
-            print('ServerMQTT on_connect event')
+            logging.info('ServerMQTT on_connect event')
         except Exception as ex:
-            print('Exception: {}'.format(ex))
+            logging.critical('Exception: {}'.format(ex))
 
     @staticmethod
     def on_disconnect(client, userdata, flags, rc):
         try:
             ServerMQTT.flag_connected = 0
 
-            print('ServerMQTT Disconnected')
+            logging.info('ServerMQTT Disconnected')
             client.reconnect()
         except Exception as ex:
-            print('ServerMQTT on_disconnect Exception: {}'.format(ex))
+            logging.error('ServerMQTT on_disconnect Exception: {}'.format(ex))
 
     @staticmethod
     def on_publish(client, userdata, result):
@@ -53,7 +54,7 @@ class ServerMQTT(object):
 
         if (ServerMQTT.counter_message_published % ServerMQTT.debug_numbernotification) == 0:
             interval_secs = (datetime.datetime.utcnow()-ServerMQTT.reference_datetime).total_seconds()
-            print('ServerMQTT OnPublish Method raised: {0} RelativeTime: {1}'.format(
+            logging.info('ServerMQTT OnPublish Method raised: {0} RelativeTime: {1}'.format(
                 ServerMQTT.counter_message_published, interval_secs))
 
     @staticmethod
@@ -66,7 +67,7 @@ class ServerMQTT(object):
             ServerMQTT.hostname = hostname
             ServerMQTT.port = port
         except Exception as ex:
-            print('ServerMQTT configure_client Exception: {}'.format(ex))
+            logging.critical('ServerMQTT configure_client Exception: {}'.format(ex))
 
     @staticmethod
     def stop_client():
@@ -74,24 +75,24 @@ class ServerMQTT(object):
             ServerMQTT.get_client_mqtt().disconnect()
             ServerMQTT.get_client_mqtt().loop_stop()
         except Exception as ex:
-            print('ServerMQTT stop_client Exception: {}'.format(ex))
+            logging.error('ServerMQTT stop_client Exception: {}'.format(ex))
 
     @staticmethod
     def connect_client():
         try:
             ServerMQTT.client_mqtt.connect(host=ServerMQTT.hostname, port=ServerMQTT.port)
-            print('ServerMQTT configure_client hostname: {0}, port: {1}'.format(ServerMQTT.hostname, ServerMQTT.port))
+            logging.info('ServerMQTT configure_client hostname: {0}, port: {1}'.format(ServerMQTT.hostname, ServerMQTT.port))
             ServerMQTT.reference_datetime = datetime.datetime.utcnow()
         except Exception as ex:
-            print('ServerMQTT configure_client Exception: {}'.format(ex))
+            logging.critical('ServerMQTT configure_client Exception: {}'.format(ex))
 
     @staticmethod
     def loop_wait():
         try:
-            print('ServerMQTT Loop Forever')
+            logging.info('ServerMQTT Loop Forever')
             ServerMQTT.get_client_mqtt().loop_forever()
         except Exception as ex:
-            print('ServerMQTT Loop Forever Exception: {}'.format(ex))
+            logging.critical('ServerMQTT Loop Forever Exception: {}'.format(ex))
 
     @staticmethod
     def publish(topic: str, dictionary: Dict[str, Any]) -> bool:
@@ -100,7 +101,7 @@ class ServerMQTT(object):
                 return False
 
             if not dictionary:
-                print('No Data To Transfer')
+                logging.info('No Data To Transfer')
                 return False
 
             string_json = json.dumps(obj=dictionary,
@@ -112,11 +113,11 @@ class ServerMQTT(object):
                 return False
 
             if return_info.rc != mqtt.MQTT_ERR_SUCCESS:
-                print('ServerMQTT Publish Error: {}'.format(str(return_info.rc)))
+                logging.error('ServerMQTT Publish Error: {}'.format(str(return_info.rc)))
                 return False
 
             return True
 
         except Exception as ex:
-            print('Exception ServerMQTT PublishBis: {}'.format(ex))
+            logging.error('Exception ServerMQTT PublishBis: {}'.format(ex))
             return False

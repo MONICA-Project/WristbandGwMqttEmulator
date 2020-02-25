@@ -1,13 +1,9 @@
 from pytz import utc
 
-# from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ProcessPoolExecutor
+import logging
 
-# jobstores = {
-#     'mongo': {'type': 'mongodb'},
-#     'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
-# }
 executors = {
     'default': {'type': 'threadpool', 'max_workers': 20},
     'processpool': ProcessPoolExecutor(max_workers=5)
@@ -30,7 +26,7 @@ class BackgroundSchedulerConfigure:
                 executors=executors, job_defaults=job_defaults, timezone=utc)
             BackgroundSchedulerConfigure.scheduler.remove_all_jobs()
         except Exception as ex:
-            print('Exception Background: {}'.format(ex))
+            logging.critical('Exception Background: {}'.format(ex))
 
     @staticmethod
     def add_job(func, interval_secs, id_job) -> bool:
@@ -41,10 +37,10 @@ class BackgroundSchedulerConfigure:
                                                                      id=id_job,
                                                                      replace_existing=True)
             BackgroundSchedulerConfigure.list_jobs.append(new_job)
-            print('Background Launched Interval: {}'.format(interval_secs))
+            logging.info('Background Launched Interval: {}'.format(interval_secs))
             return True
         except Exception as ex:
-            print('Exception Background: {}'.format(ex))
+            logging.critical('Exception Background: {}'.format(ex))
             return False
 
     @staticmethod
@@ -52,7 +48,7 @@ class BackgroundSchedulerConfigure:
         try:
             BackgroundSchedulerConfigure.scheduler.start()
         except Exception as ex:
-            print('Exception Background: {}'.format(ex))
+            logging.critical('Exception Background: {}'.format(ex))
 
     @staticmethod
     def stop():
@@ -60,4 +56,4 @@ class BackgroundSchedulerConfigure:
             BackgroundSchedulerConfigure.scheduler.remove_all_jobs()
             BackgroundSchedulerConfigure.scheduler.shutdown()
         except Exception as ex:
-            print('Exception Background: {}'.format(ex))
+            logging.error('Exception Background: {}'.format(ex))

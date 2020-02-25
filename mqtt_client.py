@@ -1,5 +1,5 @@
 import paho.mqtt.client as mqtt
-
+import logging
 
 class MQTTClient:
     client_mqtt = None
@@ -14,54 +14,54 @@ class MQTTClient:
 
             MQTTClient.flag_connected = 1
 
-            print('MQTT on_connect event')
+            logging.info('MQTT on_connect event')
 
             if not MQTTClient.list_topics:
-                print('MQTT Registration to all topics')
+                logging.info('MQTT Registration to all topics')
                 client.subscribe(topic='#', qos=0)
                 return
 
             client.subscribe(MQTTClient.list_topics)
-            print('MQTT Registration to specific topics: {}'.format(len(MQTTClient.list_topics)))
+            logging.info('MQTT Registration to specific topics: {}'.format(len(MQTTClient.list_topics)))
         except Exception as ex:
-            print('Exception: {}'.format(ex))
+            logging.critical('Exception: {}'.format(ex))
 
     @staticmethod
     def on_disconnect(client, userdata, flags, rc):
         try:
             MQTTClient.flag_connected = 0
 
-            print('Client Disconnected')
+            logging.info('Client Disconnected')
             # client.reconnect()
         except Exception as ex:
-            print('Exception: {}'.format(ex))
+            logging.error('Exception: {}'.format(ex))
 
     @staticmethod
     def on_unsubscribe(client, userdata, level, buf):
-        print('Unsubscribed Success! {}'.format(buf))
+        logging.info('Unsubscribed Success! {}'.format(buf))
 
     @staticmethod
     def on_subscribe(client, userdata, level, buf):
-        print('Subscribed Success! {}'.format(len(buf)))
+        logging.info('Subscribed Success! {}'.format(len(buf)))
 
     @staticmethod
     def on_message(client, userdata, message):
         try:
             if client:
                 return
-            print('Message topic: ' + message.topic)
-            print('Message received: ' + str(message.payload))
+            logging.info('Message topic: ' + message.topic)
+            logging.info('Message received: ' + str(message.payload))
         except Exception as ex:
-            print(ex)
+            logging.error(ex)
 
     @staticmethod
     def connect(hostname: str, port: int):
         try:
             MQTTClient.client_mqtt.connect(host=hostname, port=port)
-            print('MQTT Client Test Connected to host: {0}, port: {1}'.format(hostname, port))
+            logging.info('MQTT Client Test Connected to host: {0}, port: {1}'.format(hostname, port))
             MQTTClient.client_mqtt.loop_forever()
         except Exception as ex:
-            print('MQTT Client connect Exception: {}'.format(ex))
+            logging.error('MQTT Client connect Exception: {}'.format(ex))
 
     @staticmethod
     def disconnect():
@@ -69,10 +69,10 @@ class MQTTClient:
             if not MQTTClient.client_mqtt:
                 return
             MQTTClient.client_mqtt.disconnect()
-            print('MQTT Client Test Disonnected')
+            logging.info('MQTT Client Test Disonnected')
             MQTTClient.client_mqtt.loop_stop()
         except Exception as ex:
-            print('MQTT Client connect Exception: {}'.format(ex))
+            logging.error('MQTT Client connect Exception: {}'.format(ex))
 
     @staticmethod
     def set_list_topics(list_topics: list):
@@ -87,4 +87,4 @@ class MQTTClient:
             MQTTClient.client_mqtt.on_message = MQTTClient.on_message
             MQTTClient.client_mqtt.on_subscribe = MQTTClient.on_subscribe
         except Exception as ex:
-            print('MQTT Client initialize Exception: {}'.format(ex))
+            logging.critical('MQTT Client initialize Exception: {}'.format(ex))

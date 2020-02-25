@@ -6,42 +6,45 @@ import numpy as np
 from backgroundscheduler import BackgroundSchedulerConfigure
 from mqtt_client import MQTTClient
 from messagesender import Publisher
-from settings import Settings
-from typing import List, Dict
+from settings import Settings, PermanentSettings
+from typing import List, Dict, Union
 from utilitytimer import TimerRequest
+import logging
 
 DEVICES = {}
+DEFAULT_LOG_FORMATTER = "%(asctime)s.%(msecs)04d %(name)-7s %(levelname)s: %(message)s"
 
 
 def main():
     try:
         np.random.seed(0)
+        init_logger(logging.DEBUG)
 
-        print('Started Application MQTT')
+        logging.info('Started Application MQTT')
         signal.signal(signal.SIGINT, signal_handler)
 
-        print('Generating MQTT Devices...')
+        logging.info('Generating MQTT Devices...')
         global DEVICES
         DEVICES = generate_devices_dictionary()
 
-        print('Started Application MQTT. Number Wristband Emulated: {}'.format(len(DEVICES)))
+        logging.info('Started Application MQTT. Number Wristband Emulated: {}'.format(len(DEVICES)))
         BackgroundSchedulerConfigure.configure()
         BackgroundSchedulerConfigure.add_job(func=periodic_publish,
                                              interval_secs=Settings.interval_sending_secs,
-                                             id_job=Settings.job_id)
+                                             id_job=PermanentSettings.job_id)
         BackgroundSchedulerConfigure.start()
 
         TimerRequest.configure_timer(func=terminate_during_execution, timeout=1)
 
-        Publisher.configure(client_id=Settings.client_id, hostname=Settings.hostname, port=Settings.port)
+        Publisher.configure(client_id=PermanentSettings.client_id, hostname=Settings.hostname, port=Settings.port)
         Publisher.connect()
         Publisher.loop_wait()
     except Exception as ex:
-        print('Exception Main: {}'.format(ex))
+        logging.critical('Exception Main: {}'.format(ex))
 
 
 def generate_devices_dictionary():
-    topic = Settings.topic_prefix+"SCRAL/"+Settings.device+"/"+Settings.property
+    topic = Settings.topic_prefix+"SCRAL/"+PermanentSettings.device+"/"+PermanentSettings.property
 
     devices = {}
     for i in range(0, Settings.device_number):
@@ -50,8 +53,8 @@ def generate_devices_dictionary():
         else:
             str_i = str(i)
 
-        devices[i] = [topic, Settings.device_name+str_i]
-        print(str_i+": "+str(devices[i]))
+        devices[i] = [topic, PermanentSettings.device_name+str_i]
+        logging.debug(str_i+": "+str(devices[i]))
 
     return devices
 
@@ -76,38 +79,46 @@ def extract_list_topics(dictionary_obs: Dict[int, List[str]]) -> list:
 
 def terminate_during_execution():
     try:
-        print('terminate_during_execution Called')
+        logging.info('terminate_during_execution Called')
         signal_handler(signal=signal.SIGINT, frame=None)
     except Exception as ex:
-        print('terminate_during_execution Exception: {}'.format(ex))
+        logging.error('terminate_during_execution Exception: {}'.format(ex))
 
 
 def periodic_publish():
     try:
-        if Settings.list_events_publish:
+        if PermanentSettings.list_events_publish:
             return
-        Settings.list_events_publish.append(1)
-        print('Called periodic publish, time: {}'.format(datetime.datetime.utcnow().isoformat()))
+        PermanentSettings.list_events_publish.append(1)
+        logging.info('Called periodic publish, time: {}'.format(datetime.datetime.utcnow().isoformat()))
         Publisher.publish_topics(dictionary_observables=DEVICES)
-        Settings.list_events_publish.clear()
+        PermanentSettings.list_events_publish.clear()
 
-        if Settings.just_one_time_execution == 1:
-            print('\nRequest ONE TIME Execution')
+        if PermanentSettings.just_one_time_execution == 1:
+            logging.info('\nRequest ONE TIME Execution')
             TimerRequest.action_timer()
 
     except Exception as ex:
-        print('periodic_publish Exception: {}'.format(ex))
+        logging.error('periodic_publish Exception: {}'.format(ex))
+
+
+def init_logger(debug_level: Union[int, str]):
+    """ This function configure the logger according to the specified debug_level taken from logging class. """
+
+    logging.basicConfig(format="%(message)s")
+    logging.getLogger().setLevel(level=debug_level)
+    logging.getLogger().handlers[0].setFormatter(logging.Formatter(DEFAULT_LOG_FORMATTER, datefmt="(%b-%d) %H:%M:%S"))
 
 
 def signal_handler(signal, frame):
     """ This signal handler overwrite the default behaviour of SIGKILL (pressing CTRL+C). """
 
-    print("\nThe MQTT listener is turning down now...\n")
+    logging.info("\nThe MQTT listener is turning down now...\n")
     TimerRequest.clear_timer()
     BackgroundSchedulerConfigure.stop()
     MQTTClient.disconnect()
     Publisher.stop_client()
-    print("\nAPPLICATION STOPPED\n")
+    logging.info("\nAPPLICATION STOPPED\n")
     sys.exit(0)
 
 

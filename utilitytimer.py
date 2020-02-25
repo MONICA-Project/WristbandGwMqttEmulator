@@ -1,4 +1,5 @@
 import threading
+import logging
 
 
 class TimerRequest:
@@ -16,27 +17,27 @@ class TimerRequest:
         try:
             TimerRequest.timer_set = threading.Timer(interval=timeout, function=func)
         except Exception as ex:
-            print('TimerRequest configure_timer Exception: {}'.format(ex))
+            logging.critical('TimerRequest configure_timer Exception: {}'.format(ex))
 
     @staticmethod
     def action_timer() -> bool:
         try:
             TimerRequest.get_timer().start()
             TimerRequest.request_start = True
-            print('TimerRequest start Called')
+            logging.info('TimerRequest start Called')
         except Exception as ex:
-            print('TimerRequest action_timer Exception: {}'.format(ex))
+            logging.critical('TimerRequest action_timer Exception: {}'.format(ex))
 
     @staticmethod
     def clear_timer() -> bool:
         try:
             if not TimerRequest.request_start:
-                print('TimerRequest clear_timer Not necessary')
+                logging.info('TimerRequest clear_timer Not necessary')
                 return True
 
             TimerRequest.get_timer().cancel()
-            print('TimerRequest clear_timer Called')
+            logging.info('TimerRequest clear_timer Called')
             return True
         except Exception as ex:
-            print('TimerRequest clear_timer Exception: {}'.format(ex))
+            logging.error('TimerRequest clear_timer Exception: {}'.format(ex))
             return False
