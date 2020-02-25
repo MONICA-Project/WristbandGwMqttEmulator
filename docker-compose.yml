@@ -1,0 +1,94 @@
+version: '3'
+services:
+    node-red:
+        image: nodered/node-red-docker:slim-v8
+        volumes:
+            - nodered:/data
+        ports:
+            - "1880:1880"
+    mosquitto:
+        image: toke/mosquitto
+        volumes:
+            - mosquitto_data:/mqtt/data
+            - mosquitto_conf:/mqtt/config:ro
+        ports:
+            - "1883:1883"
+            - "9001:9001"
+    gost-db:
+        image: geodan/gost-db
+        volumes:
+            - postgis:/var/lib/postgresql/data
+        environment:
+            POSTGRES_DB: gost
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+    gost:
+        image: geodan/gost
+        volumes:
+            - gost_conf:/gostserver/config
+        depends_on:
+            - mosquitto
+            - gost-db
+        environment:
+            GOST_DB_HOST: gost-db
+            GOST_MQTT_HOST: mosquitto
+    dashboard:
+        image: geodan/gost-dashboard
+        ports:
+            - "8080:8080"
+        depends_on:
+            - gost
+    scral:
+        image: monicaproject/scral:wristband_mqtt
+        container_name: "SCRAL-WB-MQTT"
+        ports:
+            - "8000:8000"
+        depends_on:
+            - dashboard
+            - gost
+            - mosquitto
+        environment:
+            ### Necessary to enable other env variables
+            CONFIG: "custom"
+
+            # MODULE_NAME: "SCRAL"
+            # ENDPOINT_URL: "localhost"
+            # ENDPOINT_PORT: 8000
+            PUB_BROKER_URI: mosquitto
+            PUB_BROKER_PORT: 1883
+            # PUB_BROKER_KEEPALIVE: 60
+            # GOST_MQTT_PREFIX: GOST/
+            # OGC_SERVER_ADDRESS: http://localhost:8080/v1.0
+            OGC_SERVER_ADDRESS: http://dashboard:8080/v1.0
+            # OGC_SERVER_USER: "scral"
+            # OGC_SERVER_PASS: "password"
+            # LISTENING_ADDRESS: "0.0.0.0"
+            # LISTENING_PORT: 8000
+            VERBOSE: 1
+            # UPDATE_INTERVAL: 60
+
+            ### only for module with MQTT resource manager
+            # SUB_BROKER_URI: "iot.hamburg.de"
+            SUB_BROKER_URI: mosquitto
+
+            ### only for SLM:
+            # SITENAME: "Movida"
+            # TENANTID: "f159a3d1-cde1-405e-bc46-754609125585"
+            # SITEID: "54c9dd30-f915-42b7-b00c-c07c891fb0ce"
+    wb_mqtt_emulator:
+        image: monicaproject/wb_mqtt_emulator
+        container_name: "WB-MQTT-Emulator"
+        depends_on:
+            - dashboard
+            - gost
+            - mosquitto
+            - scral
+        # environment:
+            # - env1
+            # - env2
+volumes:
+    postgis: {}
+    nodered: {}
+    gost_conf: {}
+    mosquitto_data: {}
+    mosquitto_conf: {}

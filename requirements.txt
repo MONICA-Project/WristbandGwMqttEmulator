@@ -1,0 +1,5 @@
+numpy
+paho-mqtt
+pytz
+apscheduler
+pymap3d
