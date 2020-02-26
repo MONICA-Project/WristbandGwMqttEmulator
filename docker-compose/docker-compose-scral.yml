@@ -1,12 +1,14 @@
 version: '3'
 services:
     node-red:
+        container_name: "node-red"
         image: nodered/node-red-docker:slim-v8
         volumes:
             - nodered:/data
         ports:
             - "1880:1880"
     mosquitto:
+        container_name: "mosquitto"
         image: toke/mosquitto
         volumes:
             - mosquitto_data:/mqtt/data
@@ -15,6 +17,7 @@ services:
             - "1883:1883"
             - "9001:9001"
     gost-db:
+        container_name: "GOST-db"
         image: geodan/gost-db
         volumes:
             - postgis:/var/lib/postgresql/data
@@ -23,6 +26,7 @@ services:
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: postgres
     gost:
+        container_name: "GOST"
         image: geodan/gost
         volumes:
             - gost_conf:/gostserver/config
@@ -33,14 +37,15 @@ services:
             GOST_DB_HOST: gost-db
             GOST_MQTT_HOST: mosquitto
     dashboard:
+        container_name: "GOST-dashboard"
         image: geodan/gost-dashboard
         ports:
             - "8080:8080"
         depends_on:
             - gost
     scral:
+        container_name: "SCRAL-wb-MQTT"
         image: monicaproject/scral:wristband_mqtt
-        # container_name: "SCRAL-WB-MQTT"
         ports:
             - "8000:8000"
         depends_on:
@@ -58,7 +63,6 @@ services:
             PUB_BROKER_PORT: 1883
             # PUB_BROKER_KEEPALIVE: 60
             # GOST_MQTT_PREFIX: GOST/
-            # OGC_SERVER_ADDRESS: http://localhost:8080/v1.0
             OGC_SERVER_ADDRESS: http://dashboard:8080/v1.0
             # OGC_SERVER_USER: "scral"
             # OGC_SERVER_PASS: "password"
@@ -68,29 +72,8 @@ services:
             # UPDATE_INTERVAL: 60
 
             ### only for module with MQTT resource manager
-            # SUB_BROKER_URI: "iot.hamburg.de"
             SUB_BROKER_URI: mosquitto
 
-            ### only for SLM:
-            # SITENAME: "Movida"
-            # TENANTID: "f159a3d1-cde1-405e-bc46-754609125585"
-            # SITEID: "54c9dd30-f915-42b7-b00c-c07c891fb0ce"
-    wb_mqtt_emulator:
-        image: monicaproject/wb_mqtt_emulator
-        container_name: "WB-MQTT-Emulator"
-        depends_on:
-            - dashboard
-            - gost
-            - mosquitto
-            - scral
-        links:
-            - mosquitto
-        environment:
-            MQTT_HOSTNAME: mosquitto
-            MQTT_PORT: 1883
-            BURST_INTERVAL_SEC: 5
-            DEVICE_NUMBER: 4
-            GOST_MQTT_PREFIX: "GOST/"
 volumes:
     postgis: {}
     nodered: {}
