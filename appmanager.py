@@ -1,4 +1,5 @@
 import datetime
+import os
 import signal
 import sys
 import numpy as np
@@ -7,19 +8,33 @@ from backgroundscheduler import BackgroundSchedulerConfigure
 from mqtt_client import MQTTClient
 from messagesender import Publisher
 from settings import Settings, PermanentSettings
-from typing import List, Dict, Union
+from typing import Union
 from utilitytimer import TimerRequest
 import logging
+import constants
 
 DEVICES = {}
 DEFAULT_LOG_FORMATTER = "%(asctime)s.%(msecs)04d %(name)-7s %(levelname)s: %(message)s"
+DEBUG = True
 
 
 def main():
-    try:
-        np.random.seed(0)
-        init_logger(logging.DEBUG)
+    np.random.seed(0)
+    init_logger(logging.DEBUG)
 
+    if DEBUG:
+        interval_secs = Settings.interval_sending_secs
+        mqtt_hostname = Settings.hostname
+        mqtt_port = Settings.port
+    else:
+        try:
+            interval_secs = int(os.environ[constants.BURST_INTERVAL_KEY])
+            mqtt_hostname = os.environ[constants.MQTT_HOSTNAME_KEY]
+            mqtt_port = int(os.environ[constants.MQTT_PORT_KEY])
+        except KeyError as ke:
+            logging.critical("Environmental variable not found: "+str(ke))
+            exit(1)
+    try:
         logging.info('Started Application MQTT')
         signal.signal(signal.SIGINT, signal_handler)
 
@@ -29,25 +44,36 @@ def main():
 
         logging.info('Started Application MQTT. Number Wristband Emulated: {}'.format(len(DEVICES)))
         BackgroundSchedulerConfigure.configure()
-        BackgroundSchedulerConfigure.add_job(func=periodic_publish,
-                                             interval_secs=Settings.interval_sending_secs,
+        BackgroundSchedulerConfigure.add_job(func=periodic_publish, interval_secs=interval_secs,
                                              id_job=PermanentSettings.job_id)
         BackgroundSchedulerConfigure.start()
-
         TimerRequest.configure_timer(func=terminate_during_execution, timeout=1)
 
-        Publisher.configure(client_id=PermanentSettings.client_id, hostname=Settings.hostname, port=Settings.port)
+        client_id = PermanentSettings.client_id
+        logging.info("Connecting to "+mqtt_hostname+":"+str(mqtt_port)+" with id: "+client_id)
+        Publisher.configure(client_id=client_id, hostname=mqtt_hostname, port=mqtt_port)
         Publisher.connect()
         Publisher.loop_wait()
+
     except Exception as ex:
         logging.critical('Exception Main: {}'.format(ex))
 
 
 def generate_devices_dictionary():
-    topic = Settings.topic_prefix+"SCRAL/"+PermanentSettings.device+"/"+PermanentSettings.property
+    if DEBUG:
+        topic_prefix = Settings.topic_prefix
+        device_number = Settings.device_number
+    else:
+        try:
+            topic_prefix = os.environ[constants.GOST_TOPIC_PREFIX]
+            device_number = int(os.environ[constants.DEVICE_NUMBER])
+        except KeyError as ke:
+            logging.critical("Environmental variable not found: "+str(ke))
+            exit(1)
 
     devices = {}
-    for i in range(0, Settings.device_number):
+    topic = topic_prefix + constants.MQTT_SCRAL_PREFIX + PermanentSettings.device + "/" + PermanentSettings.property
+    for i in range(0, device_number):
         if i < 10:
             str_i = "0"+str(i)
         else:
@@ -59,30 +85,12 @@ def generate_devices_dictionary():
     return devices
 
 
-def extract_list_topics(dictionary_obs: Dict[int, List[str]]) -> list:
-    if not dictionary_obs:
-        return None
-
-    list_topics = list()
-
-    for key in dictionary_obs:
-        if dictionary_obs[key] is None:
-            continue
-        list_elements = dictionary_obs[key]
-        topic = list_elements[0]
-        record_topic = (topic, 0)
-
-        list_topics.append(record_topic)
-
-    return list_topics
-
-
 def terminate_during_execution():
     try:
-        logging.info('terminate_during_execution Called')
+        logging.info('terminate_during_execution called')
         signal_handler(signal=signal.SIGINT, frame=None)
     except Exception as ex:
-        logging.error('terminate_during_execution Exception: {}'.format(ex))
+        logging.error('terminate_during_execution exception: {}'.format(ex))
 
 
 def periodic_publish():

@@ -40,7 +40,7 @@ services:
             - gost
     scral:
         image: monicaproject/scral:wristband_mqtt
-        container_name: "SCRAL-WB-MQTT"
+        # container_name: "SCRAL-WB-MQTT"
         ports:
             - "8000:8000"
         depends_on:
@@ -83,9 +83,14 @@ services:
             - gost
             - mosquitto
             - scral
-        # environment:
-            # - env1
-            # - env2
+        links:
+            - mosquitto
+        environment:
+            MQTT_HOSTNAME: mosquitto
+            MQTT_PORT: 1883
+            BURST_INTERVAL_SEC: 5
+            DEVICE_NUMBER: 4
+            GOST_MQTT_PREFIX: "GOST/"
 volumes:
     postgis: {}
     nodered: {}

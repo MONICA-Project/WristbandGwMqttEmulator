@@ -25,8 +25,10 @@ class TimerRequest:
             TimerRequest.get_timer().start()
             TimerRequest.request_start = True
             logging.info('TimerRequest start Called')
+            return True
         except Exception as ex:
             logging.critical('TimerRequest action_timer Exception: {}'.format(ex))
+            return False
 
     @staticmethod
     def clear_timer() -> bool:

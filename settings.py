@@ -29,22 +29,10 @@ class PermanentSettings:
     just_one_time_execution = 0
     flag_connected = 0
     list_events_publish = list()
-    client_id = 'mqtt_wb_simulator'
-    job_id = 'publish_mqtt_scral_observables'
+
+    client_id = "mqtt_wb_simulator"
+    job_id = "publish_mqtt_scral_observables"
 
     device_name = "GeoTag"
     device = "Wristband"
     property = "Localization"
-
-
-class RemoteSettings:
-    # hostname_wp3 = "monappdwp3.monica-cloud.eu"
-    hostname = 'monapp-lst.monica-cloud.eu'
-    # hostname_rab = 'mpclsifrmq01.monica-cloud.eu'
-    port = 1884
-
-    interval_sending_secs = 5
-    device_number = 10
-    device_name = "GeoTag"
-    # topic_prefix = "GOST_WOODSTOWER/"
-    topic_prefix_lst = "GOST_LARGE_SCALE_TEST/"

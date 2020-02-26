@@ -78,13 +78,14 @@ class Publisher(object):
                                                       lat0, lon0, h0,
                                                       ell=ell_wgs84, deg=True)  # use wgs84 ellisoid
 
-                localization = Localization(tag_id=tag_id,
-                                            iot_id=iot_id,
-                                            lat=lat1,
-                                            lon=lon1,
+                localization = Localization(tag_id=tag_id, iot_id=iot_id, lat=lat1, lon=lon1,
                                             area_id=Settings.name_stages[index_stage])
-                ServerMQTT.publish(topic=topic,
-                                   dictionary=localization.to_dictionary())
+                payload = localization.to_dictionary()
+                correctly_sent = ServerMQTT.publish(topic=topic, dictionary=payload)
+                if correctly_sent:
+                    logging.debug('On topic: "'+topic+'" was sent payload: \n'+str(payload))
+                else:
+                    logging.error("Error sending on topic: '"+topic+"' payload: \n"+str(payload))
 
                 counter_message_sent += 1
 
