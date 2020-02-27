@@ -43,6 +43,7 @@ services:
             - "8080:8080"
         depends_on:
             - gost
+
     scral:
         container_name: "SCRAL-wb-MQTT"
         image: monicaproject/scral:wristband_mqtt
@@ -64,6 +65,7 @@ services:
             PUB_BROKER_PORT: 1883
             # PUB_BROKER_KEEPALIVE: 60
             # GOST_MQTT_PREFIX: GOST/
+            # OGC_SERVER_ADDRESS: http://localhost:8080/v1.0
             OGC_SERVER_ADDRESS: http://dashboard:8080/v1.0
             # OGC_SERVER_USER: "scral"
             # OGC_SERVER_PASS: "password"
@@ -74,6 +76,23 @@ services:
 
             ### only for module with MQTT resource manager
             SUB_BROKER_URI: mosquitto
+
+    wb_mqtt_emulator:
+        container_name: "WB-MQTT-Emulator"
+        image: monicaproject/wb_mqtt_emulator:latest
+        depends_on:
+            - dashboard
+            - gost
+            - mosquitto
+            - scral
+        links:
+            - mosquitto
+        environment:
+            MQTT_HOSTNAME: mosquitto
+            MQTT_PORT: 1883
+            BURST_INTERVAL_SEC: 120
+            DEVICE_NUMBER: 4
+            GOST_MQTT_PREFIX: "GOST/"
 
 volumes:
     postgis: {}

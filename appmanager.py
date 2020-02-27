@@ -15,18 +15,20 @@ import constants
 
 DEVICES = {}
 DEFAULT_LOG_FORMATTER = "%(asctime)s.%(msecs)04d %(name)-7s %(levelname)s: %(message)s"
-DEBUG = True
 
 
 def main():
     np.random.seed(0)
     init_logger(logging.DEBUG)
+    signal.signal(signal.SIGINT, signal_handler)
 
-    if DEBUG:
+    if PermanentSettings.debug:
+        logging.info("***Debug mode*** variables taken form Setting class.")
         interval_secs = Settings.interval_sending_secs
         mqtt_hostname = Settings.hostname
         mqtt_port = Settings.port
     else:
+        logging.info("***Deployment mode*** variables taken from environmental variables.")
         try:
             interval_secs = int(os.environ[constants.BURST_INTERVAL_KEY])
             mqtt_hostname = os.environ[constants.MQTT_HOSTNAME_KEY]
@@ -35,22 +37,20 @@ def main():
             logging.critical("Environmental variable not found: "+str(ke))
             exit(1)
     try:
-        logging.info('Started Application MQTT')
-        signal.signal(signal.SIGINT, signal_handler)
-
         logging.info('Generating MQTT Devices...')
         global DEVICES
         DEVICES = generate_devices_dictionary()
+        logging.info('Total number of wristband emulated: {}'.format(len(DEVICES)))
 
-        logging.info('Started Application MQTT. Number Wristband Emulated: {}'.format(len(DEVICES)))
         BackgroundSchedulerConfigure.configure()
         BackgroundSchedulerConfigure.add_job(func=periodic_publish, interval_secs=interval_secs,
                                              id_job=PermanentSettings.job_id)
         BackgroundSchedulerConfigure.start()
         TimerRequest.configure_timer(func=terminate_during_execution, timeout=1)
+        logging.debug('Periodic burst configured and scheduler started!')
 
         client_id = PermanentSettings.client_id
-        logging.info("Connecting to "+mqtt_hostname+":"+str(mqtt_port)+" with id: "+client_id)
+        logging.info('Connecting to "'+mqtt_hostname+':'+str(mqtt_port)+'" with id: "'+client_id+'"')
         Publisher.configure(client_id=client_id, hostname=mqtt_hostname, port=mqtt_port)
         Publisher.connect()
         Publisher.loop_wait()
@@ -60,13 +60,13 @@ def main():
 
 
 def generate_devices_dictionary():
-    if DEBUG:
+    if PermanentSettings.debug:
         topic_prefix = Settings.topic_prefix
         device_number = Settings.device_number
     else:
         try:
             topic_prefix = os.environ[constants.GOST_TOPIC_PREFIX]
-            device_number = int(os.environ[constants.DEVICE_NUMBER])
+            device_number = int(os.environ[constants.DEVICE_NUMBER_KEY])
         except KeyError as ke:
             logging.critical("Environmental variable not found: "+str(ke))
             exit(1)

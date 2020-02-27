@@ -6,7 +6,7 @@ class Settings:
     device_number = 4
     topic_prefix = "GOST/"
 
-    number_stages = 4
+    stage_number = 4
     name_stages = ['WoodsTower Main', 'WoodsTower Saint Denis', 'WoodsTower Chapiteau', 'WoodsTower Woodsflor']
     people_distrib_per_stage = [25, 25, 25, 25]
 
@@ -22,10 +22,10 @@ class Settings:
                   [[400, 0],
                    [0, 400]]]
 
-    # cov_stages = [[[1, 0], [0, 1]], [[1, 0], [0, 1]], [[1, 0], [0, 1]], [[1, 0], [0, 1]]]
-
 
 class PermanentSettings:
+    debug = True
+
     just_one_time_execution = 0
     flag_connected = 0
     list_events_publish = list()
