@@ -79,7 +79,7 @@ services:
 
     wb_mqtt_emulator:
         container_name: "WB-MQTT-Emulator"
-        image: monicaproject/wb_mqtt_emulator:latest
+        image: monicaproject/wb_mqtt_emulator:wt-4-stages
         depends_on:
             - dashboard
             - gost

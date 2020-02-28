@@ -79,7 +79,7 @@ services:
 
     wb_mqtt_emulator:
         container_name: "WB-MQTT-Emulator"
-        image: monicaproject/wb_mqtt_emulator:wt-4-stages
+        image: monicaproject/wb_mqtt_emulator:latest
         depends_on:
             - dashboard
             - gost
@@ -93,6 +93,7 @@ services:
             BURST_INTERVAL_SEC: 5
             DEVICE_NUMBER: 4
             GOST_MQTT_PREFIX: "GOST/"
+            DEBUG: "True"
 
             STAGE_NAME_1: "WoodsTower Main"
             DISTR_STAGE_1: 25

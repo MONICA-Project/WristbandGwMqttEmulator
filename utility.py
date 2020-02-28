@@ -17,7 +17,7 @@ def initialize_log():
         init_log_debug_mode(Settings.debug)
     else:
         try:
-            debug = os.environ[DEBUG_KEY]
+            debug = bool(os.environ[DEBUG_KEY])
             init_log_debug_mode(debug)
         except KeyError as ke:
             print("Missing debug environmental variable")
