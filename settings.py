@@ -1,4 +1,6 @@
 class Settings:
+    debug = True
+
     hostname = 'localhost'
     port = 1883
 
@@ -24,7 +26,7 @@ class Settings:
 
 
 class PermanentSettings:
-    debug = True
+    containerized = False
 
     just_one_time_execution = 0
     flag_connected = 0

@@ -43,6 +43,7 @@ services:
             - "8080:8080"
         depends_on:
             - gost
+
     scral:
         container_name: "SCRAL-wb-MQTT"
         image: monicaproject/scral:wristband_mqtt
@@ -64,6 +65,7 @@ services:
             PUB_BROKER_PORT: 1883
             # PUB_BROKER_KEEPALIVE: 60
             # GOST_MQTT_PREFIX: GOST/
+            # OGC_SERVER_ADDRESS: http://localhost:8080/v1.0
             OGC_SERVER_ADDRESS: http://dashboard:8080/v1.0
             # OGC_SERVER_USER: "scral"
             # OGC_SERVER_PASS: "password"
@@ -74,6 +76,51 @@ services:
 
             ### only for module with MQTT resource manager
             SUB_BROKER_URI: mosquitto
+
+    wb_mqtt_emulator:
+        container_name: "WB-MQTT-Emulator"
+        image: monicaproject/wb_mqtt_emulator:wt-4-stages
+        depends_on:
+            - dashboard
+            - gost
+            - mosquitto
+            - scral
+        links:
+            - mosquitto
+        environment:
+            MQTT_HOSTNAME: mosquitto
+            MQTT_PORT: 1883
+            BURST_INTERVAL_SEC: 5
+            DEVICE_NUMBER: 4
+            GOST_MQTT_PREFIX: "GOST/"
+
+            STAGE_NAME_1: "WoodsTower Main"
+            DISTR_STAGE_1: 25
+            LAT_STAGE_1: 45.797197
+            LON_STAGE_1: 4.952072
+            SIGMA_N_S_1: 400
+            SIGMA_E_O_1: 400
+
+            STAGE_NAME_2: "WoodsTower Saint Denis"
+            DISTR_STAGE_2: 25
+            LAT_STAGE_2: 45.797434
+            LON_STAGE_2: 4.952652
+            SIGMA_N_S_2: 400
+            SIGMA_E_O_2: 400
+
+            STAGE_NAME_3: "WoodsTower Chapiteau"
+            DISTR_STAGE_3: 25
+            LAT_STAGE_3: 45.797425
+            LON_STAGE_3: 4.950973
+            SIGMA_N_S_3: 400
+            SIGMA_E_O_3: 400
+
+            STAGE_NAME_4: "WoodsTower Woodsflor"
+            DISTR_STAGE_4: 25
+            LAT_STAGE_4: 45.798159
+            LON_STAGE_4: 4.952864
+            SIGMA_N_S_4: 400
+            SIGMA_E_O_4: 400
 
 volumes:
     postgis: {}

@@ -1,0 +1,15 @@
+version: '3'
+services:
+    mosquitto:
+        container_name: "mosquitto"
+        image: toke/mosquitto
+        volumes:
+            - mosquitto_data:/mqtt/data
+            - mosquitto_conf:/mqtt/config:ro
+        ports:
+            - "1883:1883"
+            - "9001:9001"
+
+volumes:
+    mosquitto_data: {}
+    mosquitto_conf: {}

@@ -1,34 +1,32 @@
 import datetime
 import os
 import signal
-import sys
 import numpy as np
+import logging
 
 from backgroundscheduler import BackgroundSchedulerConfigure
-from mqtt_client import MQTTClient
 from messagesender import Publisher
 from settings import Settings, PermanentSettings
-from typing import Union
 from utilitytimer import TimerRequest
-import logging
+
 import constants
+import utility
 
 DEVICES = {}
-DEFAULT_LOG_FORMATTER = "%(asctime)s.%(msecs)04d %(name)-7s %(levelname)s: %(message)s"
 
 
 def main():
     np.random.seed(0)
-    init_logger(logging.DEBUG)
-    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGINT, utility.signal_handler)
+    utility.initialize_log()
 
-    if PermanentSettings.debug:
-        logging.info("***Debug mode*** variables taken form Setting class.")
+    if not PermanentSettings.containerized:
+        logging.info("***Application mode*** variables taken form Setting class.")
         interval_secs = Settings.interval_sending_secs
         mqtt_hostname = Settings.hostname
         mqtt_port = Settings.port
     else:
-        logging.info("***Deployment mode*** variables taken from environmental variables.")
+        logging.info("***Containerized mode*** variables taken from environmental variables.")
         try:
             interval_secs = int(os.environ[constants.BURST_INTERVAL_KEY])
             mqtt_hostname = os.environ[constants.MQTT_HOSTNAME_KEY]
@@ -46,7 +44,7 @@ def main():
         BackgroundSchedulerConfigure.add_job(func=periodic_publish, interval_secs=interval_secs,
                                              id_job=PermanentSettings.job_id)
         BackgroundSchedulerConfigure.start()
-        TimerRequest.configure_timer(func=terminate_during_execution, timeout=1)
+        TimerRequest.configure_timer(func=utility.terminate_during_execution, timeout=1)
         logging.debug('Periodic burst configured and scheduler started!')
 
         client_id = PermanentSettings.client_id
@@ -60,7 +58,7 @@ def main():
 
 
 def generate_devices_dictionary():
-    if PermanentSettings.debug:
+    if not PermanentSettings.containerized:
         topic_prefix = Settings.topic_prefix
         device_number = Settings.device_number
     else:
@@ -85,14 +83,6 @@ def generate_devices_dictionary():
     return devices
 
 
-def terminate_during_execution():
-    try:
-        logging.info('terminate_during_execution called')
-        signal_handler(signal=signal.SIGINT, frame=None)
-    except Exception as ex:
-        logging.error('terminate_during_execution exception: {}'.format(ex))
-
-
 def periodic_publish():
     try:
         if PermanentSettings.list_events_publish:
@@ -108,26 +98,6 @@ def periodic_publish():
 
     except Exception as ex:
         logging.error('periodic_publish Exception: {}'.format(ex))
-
-
-def init_logger(debug_level: Union[int, str]):
-    """ This function configure the logger according to the specified debug_level taken from logging class. """
-
-    logging.basicConfig(format="%(message)s")
-    logging.getLogger().setLevel(level=debug_level)
-    logging.getLogger().handlers[0].setFormatter(logging.Formatter(DEFAULT_LOG_FORMATTER, datefmt="(%b-%d) %H:%M:%S"))
-
-
-def signal_handler(signal, frame):
-    """ This signal handler overwrite the default behaviour of SIGKILL (pressing CTRL+C). """
-
-    logging.info("\nThe MQTT listener is turning down now...\n")
-    TimerRequest.clear_timer()
-    BackgroundSchedulerConfigure.stop()
-    MQTTClient.disconnect()
-    Publisher.stop_client()
-    logging.info("\nAPPLICATION STOPPED\n")
-    sys.exit(0)
 
 
 if __name__ == '__main__':

@@ -1,4 +1,7 @@
 MQTT_SCRAL_PREFIX = "SCRAL/"
+DEFAULT_LOG_FORMATTER = "%(asctime)s.%(msecs)04d %(name)-7s %(levelname)s: %(message)s"
+
+DEBUG_KEY = "DEBUG"
 
 MQTT_HOSTNAME_KEY = "MQTT_HOSTNAME"
 MQTT_PORT_KEY = "MQTT_PORT"

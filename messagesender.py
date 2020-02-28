@@ -35,7 +35,7 @@ class Publisher(object):
         lon_stages = []
         cov_stages = []
 
-        if PermanentSettings.debug:
+        if not PermanentSettings.containerized:
             device_number = Settings.device_number
 
             stage_number = Settings.stage_number
