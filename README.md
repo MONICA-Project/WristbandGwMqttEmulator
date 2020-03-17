@@ -1,13 +1,13 @@
 # Wristband Gateway MQTT Emulator
 
 This repository contains an application that emulates the behaviour of the Wristband Gateway (GW) that has been used in the MONICA project.
-Differently from the fisrt version of the Wristband GW
+Differently from the first version of the Wristband GW
 (which uses [REST protocol](https://en.wikipedia.org/wiki/Representational_state_transfer)),
 this application has been configured to send wristband messages by using the [MQTT protocol](http://mqtt.org/). 
 
-The application is designed to generate wristband positions according to a two-dimensional Gaussian distribution.
+The application generates wristband positions according to a 2-D Gaussian distribution centered in a specific position, provided as input and expressed in terms of latitude and longitude, and a 2-D covariance matrix, whose main parameters can be provided as input too.
 
-This application has developed by Luca Mannella starting from the 
+This application has been developed by Luca Mannella starting from the 
 _SCRAL emulator_ developed by Antonio Defina with contributions from Francesco Sottile, all from LINKS Foundation.
 
 ## Getting Started
