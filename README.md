@@ -100,7 +100,7 @@ If you are not familiar about the variables meaning, please use simply the defau
 - DEBUG: specify if you want more debug logging information (default value is false).
 
 The application is configured to have at most 4 different positions or epicenters, called also stages, around which the positions of wristbands are gererated accorging to a 2-D Gaussian distribution.
-If you want to use less stage you  just have to put 0 in the field "DISTR_STAGE_N". 
+If you want to use less epicenters/stages you  just have to put a 0 percentage in the field "DISTR_STAGE_N". 
 - STAGE_NAME_1: the name associated to the first epicenter/stage;
 - DISTR_STAGE_1: the probability of having a wristband associated to this stage;
 - LAT_STAGE_1: the latitude of the first epicenter/stage;
