@@ -3,22 +3,22 @@
 This repository contains an application that emulates the behaviour of the Wristband Gateway (GW) that has been used in the MONICA project.
 Differently from the first version of the Wristband GW
 (which uses [REST protocol](https://en.wikipedia.org/wiki/Representational_state_transfer)),
-this application has been configured to generate wrisband postions and send wristband messages by using the [MQTT protocol](http://mqtt.org/). 
+this application has been configured to send wristband messages to the IoT platform by using the [MQTT protocol](http://mqtt.org/). 
 
 The application generates wristband positions according to a 2-D Gaussian distribution centered in a specific position, provided as input and expressed in terms of latitude and longitude, and a 2-D covariance matrix, whose main parameters can be provided as input too.
 
 This application has been developed by Luca Mannella starting from the 
-_SCRAL emulator_ developed by Antonio Defina with contributions from Francesco Sottile, all from LINKS Foundation.
+_SCRAL emulator_ developed by Antonio Defina with contributions from Francesco Sottile (all from LINKS Foundation).
 
 ## Getting Started
 To test the application using the source code you should follow this section, otherwise if you want to work with Docker
-container follow the "Docker section" under "Deployment" section.
+container follow the "Docker section" under the "Deployment" section.
 
 ### Starting an MQTT broker or the MONICA Environment
 To make the application work properly, it is necessary to have AT LEAST an
 [MQTT broker](https://www.hivemq.com/blog/mqtt-essentials-part-3-client-broker-connection-establishment/).
 You can use whatever [broker](https://github.com/mqtt/mqtt.github.io/wiki/brokers) you want, but we have tested
-the our solution only with [Eclipse Mosquitto](https://mosquitto.org/).
+ our solution only with [Eclipse Mosquitto](https://mosquitto.org/).
 
 If you need just an MQTT broker, you can start an "Eclipse Mosquitto" broker going inside "docker-compose" folder
 and running the following command:
@@ -34,7 +34,7 @@ $ docker-compose -f docker-compose.yml up
 This compose file will start an Eclipse Mosquitto Broker, the storage backend of MONICA ecosystem (a GOST server)
 and the _Wristband MQTT module_ of the Smart City Adaptation Layer (SCRAL).
 
-Once you have created the MONICA environment, you can check if data are correctly flowing checking the
+Once you have created the MONICA environment, you can check if data are correctly flowing by looking at the
 "local" SCRAL REST page at this url: http://localhost:8000/scral/v1.0/wristband-gw,
 the GOST dashboard at: http://localhost:8080 or the GOST main entrypoint at: http://localhost:8080/v1.0
 
@@ -88,8 +88,8 @@ To test the whole environment, it is suggested to start the "docker-compose-test
 $ docker-compose -f docker-compose-testing.yml up
 ```
 
-Inside the docker-compose file you can find all the variables to set with a default value.
-If you are not sure of which values you should check, please use simply the default values.
+Inside the docker-compose file you can find all the variables that are set to a default value.
+If you are not familiar about the variables meaning, please use simply the default values.
 
 #### Variables
 - MQTT_HOSTNAME: the url of the MQTT broker or the name of the dockerized MQTT container;
@@ -99,12 +99,12 @@ If you are not sure of which values you should check, please use simply the defa
 - GOST_MQTT_PREFIX: the MQTT topic used by GOST (default value is "GOST/");
 - DEBUG: specify if you want more debug logging information (default value is false).
 
-The application is configured to have at most 4 different points or epicenters, called also stages, around which the locations of wristbands are gererated.
+The application is configured to have at most 4 different positions or epicenters, called also stages, around which the positions of wristbands are gererated accorging to a 2-D Gaussian distribution.
 If you want to use less stage you  just have to put 0 in the field "DISTR_STAGE_N". 
 - STAGE_NAME_1: the name associated to the first epicenter/stage;
-- DISTR_STAGE_1: the probability of having a wristband in this stage;
-- LAT_STAGE_1: the latitude of the first epicenter;
-- LON_STAGE_1: the longitude of the first epicenter;
+- DISTR_STAGE_1: the probability of having a wristband associated to this stage;
+- LAT_STAGE_1: the latitude of the first epicenter/stage;
+- LON_STAGE_1: the longitude of the first epicenter/stage;
 - SIGMA_N_S_1: it is the variance along North-South of the Gaussian distribution (default value 400);
 - SIGMA_E_O_1: it is the variance along East-West of the Gaussian distribution (default value 400).
 
