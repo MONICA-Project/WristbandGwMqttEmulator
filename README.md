@@ -3,7 +3,7 @@
 This repository contains an application that emulates the behaviour of the Wristband Gateway (GW) that has been used in the MONICA project.
 Differently from the first version of the Wristband GW
 (which uses [REST protocol](https://en.wikipedia.org/wiki/Representational_state_transfer)),
-this application has been configured to send wristband messages by using the [MQTT protocol](http://mqtt.org/). 
+this application has been configured to generate wrisband postions and send wristband messages by using the [MQTT protocol](http://mqtt.org/). 
 
 The application generates wristband positions according to a 2-D Gaussian distribution centered in a specific position, provided as input and expressed in terms of latitude and longitude, and a 2-D covariance matrix, whose main parameters can be provided as input too.
 
