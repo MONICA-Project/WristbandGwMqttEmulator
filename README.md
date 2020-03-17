@@ -1,9 +1,9 @@
 # Wristband Gateway MQTT Emulator
 
 This repository contains an application that emulates the behaviour of the Wristband Gateway (GW) that has been used in the MONICA project.
-Differently from the original gateway
-(that use [REST protocol](https://en.wikipedia.org/wiki/Representational_state_transfer)),
-this software is configured to send messages through [MQTT protocol](http://mqtt.org/). 
+Differently from the fisrt version of the Wristband GW
+(which uses [REST protocol](https://en.wikipedia.org/wiki/Representational_state_transfer)),
+this application has been configured to send wristband messages by using the [MQTT protocol](http://mqtt.org/). 
 
 The application is designed to generate wristband positions according to a two-dimensional Gaussian distribution.
 
